@@ -403,6 +403,7 @@ Rather than predicting an RNA structure directly, the algorithm constructs a Ham
 
 This section describes the mathematical formulation implemented throughout the project and explains how each equation is translated into software.
 
+The mathematical formulation implemented in this project follows Model 3 proposed by Zaborniak et al. The equations presented in this section are adapted from that work, while the pseudoknot penalty is based on the polymer entropy formulation introduced by Hajdin et al.
 ---
 
 # 📐 Step 1 — Candidate Stem Generation
@@ -593,6 +594,8 @@ which is deliberately chosen to dominate every thermodynamic contribution.
 Unlike many RNA folding algorithms that explicitly prohibit pseudoknots,
 
 this implementation supports pseudoknot evaluation through an entropy-based penalty derived from the ShapeKnots model.
+
+The entropy-based pseudoknot formulation implemented in this project follows the polymer entropy model proposed by Hajdin et al. Rather than using the heuristic pseudoknot penalty described in the original QUBO formulation, this implementation employs the λ lookup tables and entropy approximation reported in the ShapeKnots publication.
 
 For every geometrically valid pseudoknot,
 
@@ -807,6 +810,7 @@ Its responsibilities are intentionally restricted to thermodynamic calculations.
 
 The module **does not perform RNA folding** on behalf of the project. Instead, it provides experimentally validated thermodynamic quantities required during Hamiltonian construction.
 
+All thermodynamic quantities used throughout this project, including nearest-neighbour stacking energies and hairpin loop energies, are obtained using the ViennaRNA Package. ViennaRNA is used solely as a thermodynamic reference implementation and benchmark; the final predicted RNA secondary structure is generated exclusively through optimization of the constructed QUBO Hamiltonian.
 ---
 
 ### Responsibilities
@@ -1444,21 +1448,34 @@ Several promising extensions remain for future development.
 ---
 
 # 📚 References
+[1] Tristan Zaborniak, Juan Giraldo, Hausi Müller,
+Hosna Jabbari, Ulrike Stege.
 
-1. Tristan Zaborniak, Juan Giraldo, Hausi Müller, Hosna Jabbari and Ulrike Stege.
+A QUBO Model of the RNA Folding Problem
+Optimized by Variational Hybrid Quantum Annealing.
 
-   **A QUBO Model of the RNA Folding Problem Optimized by Variational Hybrid Quantum Annealing.**
+Proceedings of the IEEE International Conference
+on Quantum Computing and Engineering (QCE),
+2022.
 
-   IEEE International Conference on Quantum Computing and Engineering (QCE), 2022.
+--------------------------------------------------------
 
-2. Hajdin et al.
+[2] Catherine E. Hajdin et al.
 
-   **Accurate SHAPE-directed RNA Secondary Structure Modeling, Including Pseudoknots.**
+Accurate SHAPE-directed RNA Secondary Structure
+Modeling, Including Pseudoknots.
 
-3. Lorenz et al.
+Proceedings of the National Academy of Sciences
+(PNAS), 2013.
 
-   **ViennaRNA Package 2.0**
+--------------------------------------------------------
 
+[3] Ronny Lorenz et al.
+
+ViennaRNA Package 2.0.
+
+Algorithms for Molecular Biology,
+2011.
 ---
 
 # 👨‍💻 Authors
@@ -1520,6 +1537,8 @@ Please also cite the original research papers that inspired this implementation.
 # 🙏 Acknowledgements
 
 This implementation would not have been possible without the contributions of the following projects and researchers.
+
+The authors gratefully acknowledge the developers of the ViennaRNA Package and D-Wave Ocean SDK, whose software formed essential components of this implementation. The mathematical formulation presented in this project builds upon the work of Zaborniak et al., while the entropy-based pseudoknot model is derived from the work of Hajdin et al.
 
 ### ViennaRNA Package
 
