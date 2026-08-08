@@ -54,10 +54,6 @@ def main():
 
     result = solver.solve(Q)
 
-    print(
-        f"Best QUBO energy : {result.energy:.4f}"
-    )
-
     # -----------------------------------------------------
     # Decode
     # -----------------------------------------------------
