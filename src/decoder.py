@@ -12,7 +12,7 @@ the quantum solver.
 """
 
 from __future__ import annotations
-
+import numpy as np
 from stem_generator import Stem
 
 
@@ -149,4 +149,7 @@ class Decoder:
 
             matrix[right - 1][left - 1] = 1
 
-        return matrix
+        return np.array(
+            matrix,
+            dtype=np.int8,
+        )
