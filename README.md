@@ -1,62 +1,176 @@
-# RNA Folding using Variational Hybrid Quantum Annealing (QUBO)
+# 🧬 RNA Secondary Structure Prediction using Quantum Annealing
 
-This project implements and compares various QUBO (*Quadratic Unconstrained Binary Optimization*) formulation models applied to the RNA secondary structure folding problem including pseudoknots. It utilizes an optimization approach called **Variational Hybrid Quantum Annealing**, combining a hybrid quantum annealer (D-Wave) with a classical optimizer (SPSA).
+<div align="center">
 
----
+### A Modular Research Implementation of RNA Secondary Structure Prediction using
+### **Quadratic Unconstrained Binary Optimization (QUBO)** and **Quantum Annealing**
 
-## 📌 Table of Contents
-- [About the Paper / Context](#-about-the-paper--context)
-- [Compared QUBO Models](#-compared-qubo-models)
-- [Project Architecture](#-project-architecture)
-- [Installation & Prerequisites](#-installation--prerequisites)
-- [API Keys Setup](#-api-keys-setup)
-- [Usage](#-usage)
-- [Methodology & Training (VHQAE)](#-methodology--training-vhqae)
-- [Results & Evaluation](#-results--evaluation)
-- [References & Citations](#-references--citations)
+*Built using ViennaRNA, D-Wave Ocean SDK and Python*
 
----
+![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
+![ViennaRNA](https://img.shields.io/badge/ViennaRNA-2.x-green.svg)
+![D-Wave Ocean](https://img.shields.io/badge/D--Wave-Ocean-purple.svg)
+![Optimization](https://img.shields.io/badge/Optimization-QUBO-orange.svg)
+![Platform](https://img.shields.io/badge/Platform-qBraid%20%7C%20Local-black.svg)
 
-## ℹ️ About the Paper / Context
-
-Predicting RNA secondary structure (including pseudoknots) under the minimum free energy (MFE) model is an **NP-hard** problem. 
-This repository is based on the research presented in:
-
-> **Title:** *A QUBO model of the RNA folding problem optimized by variational hybrid quantum annealing*  
-> **Authors:** Tristan Zaborniak, Juan Giraldo, Hausi Müller, Hosna Jabbari, Ulrike Stege  
-> **Published in:** 2022 IEEE International Conference on Quantum Computing and Engineering (QCE)  
-> **DOI:** [10.1109/QCE53715.2022.00037](https://doi.org/10.1109/QCE53715.2022.00037)[cite: 1]
+</div>
 
 ---
 
-## 🧪 Compared QUBO Models
-
-This project allows manipulating and comparing three distinct formulations:
-
-1. **Model 1 (M1) - Baseline (Stem-level):** Maximizes base pairs and average stem length with heuristic penalties for pseudoknots.
-2. **Model 2 (M2) - Stacked Quartets:** Based on length-2 sub-units and experimental nearest-neighbor stacking energies.
-3. **Model 3 (M3) - Proposed Physical Model:** Incorporates stem thermodynamics (nearest-neighbor), a polymer physics-inspired penalty for pseudoknots ($P_{PK}'$), and a hairpin loop penalty.
+> [!IMPORTANT]
+> This repository contains a complete implementation of an RNA secondary structure prediction framework based on **Quadratic Unconstrained Binary Optimization (QUBO)**. The project reformulates RNA folding as a combinatorial optimization problem that can be solved using **quantum-inspired annealing** or executed on compatible **quantum annealing hardware** with minimal modifications.
 
 ---
 
-## 📁 Project Architecture
+# 📖 Abstract
+
+Predicting the secondary structure of RNA is one of the fundamental problems in computational biology. Since RNA molecules fold into energetically favorable configurations through intramolecular base pairing, determining the correct secondary structure enables a deeper understanding of numerous biological processes including gene regulation, protein synthesis, catalysis, viral replication and RNA-based therapeutics.
+
+Unlike traditional dynamic programming approaches that explicitly search the folding space, this project reformulates RNA folding as a **Quadratic Unconstrained Binary Optimization (QUBO)** problem. Candidate stems are first generated geometrically, thermodynamic information is obtained from the ViennaRNA Package, and the complete folding problem is encoded into a Hamiltonian suitable for optimization through quantum annealing.
+
+The implementation follows the formulation proposed by **Zaborniak et al.**, while extending the Hamiltonian with a polymer entropy based pseudoknot penalty inspired by the **ShapeKnots** model proposed by **Hajdin et al.** The resulting optimization problem is solved using D-Wave Ocean's simulated annealing backend, while maintaining compatibility with actual quantum annealers through an abstract solver interface.
+
+This repository serves both as a research implementation and as an educational reference illustrating how modern RNA thermodynamic models can be translated into optimization problems suitable for quantum computing.
+
+---
+
+# ✨ Project Highlights
+
+✔ Complete implementation of the Model-3 QUBO formulation proposed by Zaborniak et al.
+
+✔ ViennaRNA integration for nearest-neighbour thermodynamic calculations
+
+✔ Automatic geometric stem generation
+
+✔ Duplicate-free candidate stem enumeration
+
+✔ Polymer entropy based pseudoknot modelling
+
+✔ Quantum-inspired optimization using D-Wave Ocean SDK
+
+✔ Modular architecture supporting future quantum hardware execution
+
+✔ Automatic decoding into dot-bracket notation
+
+✔ Evaluation using Matthews Correlation Coefficient (MCC)
+
+✔ Comprehensive unit tests for every major module
+
+---
+
+# 📌 Table of Contents
+
+- [Project Motivation](#-project-motivation)
+- [Repository Structure](#-repository-structure)
+- [Scientific Background](#-scientific-background)
+- [Mathematical Formulation](#-mathematical-formulation)
+- [Software Architecture](#-software-architecture)
+- [Installation](#-installation)
+- [Execution](#-execution)
+- [Classical Benchmark Results](#-classical-benchmark-results)
+- [Quantum / Quantum-inspired Implementation](#-quantum--quantum-inspired-implementation)
+- [Results and Analysis](#-results-and-analysis)
+- [Scaling and Quantum Resource Analysis](#-scaling-and-quantum-resource-analysis)
+- [Assumptions](#-assumptions)
+- [Limitations](#-limitations)
+- [Future Work](#-future-work)
+- [References](#-references)
+
+---
+
+# 🎯 Project Motivation
+
+RNA secondary structure prediction is widely regarded as an NP-hard optimization problem due to the exponentially increasing number of possible folding configurations as sequence length grows.
+
+Traditional RNA folding algorithms generally rely on dynamic programming under the Minimum Free Energy (MFE) framework. Although these approaches are computationally efficient for many practical problems, incorporating complex structural motifs such as pseudoknots substantially increases computational complexity.
+
+Recent advances in quantum optimization provide an alternative perspective by reformulating RNA folding as a combinatorial optimization problem. Rather than explicitly constructing every possible secondary structure, the problem is represented as a binary optimization task where each candidate stem corresponds to a binary decision variable. The globally optimal RNA structure is then obtained by minimizing a Hamiltonian encoding thermodynamic stability and structural constraints.
+
+The primary goal of this project is to investigate this optimization-based formulation while producing a modular software implementation suitable for experimentation, benchmarking and future execution on quantum annealing hardware.
+
+---
+
+# 📁 Repository Structure
 
 ```text
-├── data/
-│   ├── raw/                 # bpRNA-1m files (.ct / connectivity)
-│   ├── train/               # Training dataset (70 structures)
-│   └── test/                # Test dataset (40 structures)
-├── src/
-│   ├── preprocessing.py     # Stem & quartet extraction, base-pair matrices
-│   ├── qubo_models.py       # Construction of Hamiltonians/QUBOs (M1, M2, M3)
-│   ├── quantum_solver.py    # Interface with D-Wave Hybrid / Amazon Braket[cite: 1]
-│   ├── optimizer.py         # Classical SPSA optimizer for parameters[cite: 1]
-│   └── metrics.py           # Calculation of MCC (Matthews Correlation Coefficient) scores[cite: 1]
-├── notebooks/
-│   ├── 01_data_exploration.ipynb
-│   └── 02_results_analysis.ipynb
-├── tests/                   # Unit tests
-├── main_train.py            # VHQAE training loop[cite: 1]
-├── main_test.py             # Test dataset evaluation script[cite: 1]
-├── requirements.txt
+Project
+│
+├── main.py
+│   End-to-end RNA secondary structure prediction pipeline.
+│
+├── vienna.py
+│   Thin wrapper around ViennaRNA providing thermodynamic
+│   lookup functions and structure evaluation utilities.
+│
+├── stem_generator.py
+│   Geometric candidate stem generation.
+│
+├── qubo_builder.py
+│   Construction of the complete RNA folding Hamiltonian.
+│
+├── quantum_solver.py
+│   QUBO optimization using D-Wave Ocean SDK.
+│
+├── decoder.py
+│   Converts binary optimization variables into
+│   RNA secondary structures.
+│
+├── metrics.py
+│   Evaluation metrics including Matthews Correlation
+│   Coefficient (MCC).
+│
+├── tests/
+│   Comprehensive unit tests.
+│
+├── experiments/
+│   Validation and exploratory scripts used during development.
+│
 └── README.md
+```
+
+---
+
+# 🏗 Overall Pipeline
+
+```text
+                     RNA Sequence
+                          │
+                          ▼
+                  ViennaRNA Wrapper
+                          │
+                          ▼
+                Candidate Stem Generator
+                          │
+                          ▼
+                 Candidate Stem Library
+                          │
+                          ▼
+                  QUBO Hamiltonian Builder
+                          │
+                          ▼
+            Quadratic Optimization Problem
+                          │
+                          ▼
+         Quantum / Quantum-inspired Annealer
+                          │
+                          ▼
+                Optimal Binary Solution
+                          │
+                          ▼
+                    Structure Decoder
+                 ┌────────┴────────┐
+                 ▼                 ▼
+          Dot-Bracket       Adjacency Matrix
+                 │                 │
+                 └────────┬────────┘
+                          ▼
+            ViennaRNA Benchmark Comparison
+                          │
+                          ▼
+          Matthews Correlation Coefficient
+```
+
+---
+
+> [!NOTE]
+> The implementation intentionally separates **thermodynamic calculations**, **candidate stem generation**, **QUBO construction**, **optimization**, **structure decoding**, and **evaluation** into independent modules. This modular design simplifies testing, maintenance, future extensions and replacement of individual components (e.g., executing on real D-Wave quantum hardware instead of a simulated annealer).
