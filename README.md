@@ -174,3 +174,221 @@ Project
 
 > [!NOTE]
 > The implementation intentionally separates **thermodynamic calculations**, **candidate stem generation**, **QUBO construction**, **optimization**, **structure decoding**, and **evaluation** into independent modules. This modular design simplifies testing, maintenance, future extensions and replacement of individual components (e.g., executing on real D-Wave quantum hardware instead of a simulated annealer).
+
+---
+
+# 🧬 Scientific Background
+
+## 🧪 What is RNA?
+
+Ribonucleic Acid (RNA) is one of the fundamental biomolecules responsible for storing, transmitting and regulating genetic information inside living organisms. Unlike DNA, which typically exists as a stable double-stranded helix, RNA molecules are generally single stranded and capable of folding into highly complex three-dimensional conformations.
+
+The biological function of an RNA molecule is determined not only by its nucleotide sequence but also by the secondary and tertiary structures formed through intramolecular base pairing.
+
+RNA secondary structures play critical roles in numerous biological processes including:
+
+- Protein synthesis (mRNA, tRNA and rRNA)
+- Gene regulation
+- RNA interference
+- Ribozymes and catalytic RNAs
+- Viral genome organization
+- Drug discovery and RNA therapeutics
+
+Accurate prediction of RNA secondary structure therefore remains one of the central problems in computational biology.
+
+---
+
+## 🔬 RNA Secondary Structure
+
+RNA secondary structure describes the collection of hydrogen bonds formed between complementary nucleotides within the same RNA molecule.
+
+The canonical Watson-Crick base pairs are
+
+- Guanine — Cytosine (G-C)
+- Adenine — Uracil (A-U)
+
+along with the biologically important wobble pair
+
+- Guanine — Uracil (G-U)
+
+These interactions produce structural motifs such as
+
+- Hairpin loops
+- Internal loops
+- Bulges
+- Multibranch loops
+- Helices
+- Pseudoknots
+
+A complete RNA secondary structure consists of a combination of these motifs arranged to minimize the overall free energy of the molecule.
+
+---
+
+## 🌡 Thermodynamic Folding
+
+RNA folding is generally modeled using the **Minimum Free Energy (MFE)** principle.
+
+The free energy of a secondary structure is determined using experimentally measured nearest-neighbour thermodynamic parameters, commonly referred to as the Turner Energy Rules.
+
+The total free energy of an RNA structure is composed of several contributions:
+
+- Base stacking interactions
+- Hairpin loop penalties
+- Internal loop penalties
+- Bulge penalties
+- Multiloop penalties
+- Dangling end corrections
+
+Among these, nearest-neighbour stacking interactions contribute the majority of structural stability.
+
+This project uses the **ViennaRNA Package** as the thermodynamic engine for evaluating these energetic contributions.
+
+---
+
+## 📦 Candidate Stem Representation
+
+Rather than searching directly over every possible RNA secondary structure, this implementation first generates every geometrically valid candidate stem.
+
+Each candidate stem is defined by
+
+- Starting position on the 5' strand
+- Starting position on the 3' strand
+- Stem length
+- Total nearest-neighbour stacking energy
+- Hairpin loop penalty
+
+Each stem becomes a binary optimization variable within the QUBO Hamiltonian.
+
+If
+
+```
+qi = 1
+```
+
+the stem is included in the predicted structure.
+
+Otherwise
+
+```
+qi = 0
+```
+
+the stem is excluded.
+
+This transformation converts RNA folding into a binary optimization problem.
+
+---
+
+# ⚛ Why QUBO?
+
+Quadratic Unconstrained Binary Optimization (QUBO) is one of the most widely studied optimization models in quantum computing.
+
+A generic QUBO problem is written as
+
+\[
+\min_x \; x^TQx
+\]
+
+where
+
+- **Q** is a symmetric matrix of optimization coefficients.
+- **x** is a binary vector.
+
+Every binary variable can represent a decision within the optimization problem.
+
+In this implementation,
+
+```
+qi
+```
+
+represents the decision
+
+> "Should candidate stem *i* be included in the final RNA structure?"
+
+The objective of the optimization process is therefore to identify the subset of stems that minimizes the Hamiltonian while satisfying all structural constraints.
+
+---
+
+## ⚙ Why Quantum Annealing?
+
+Quantum annealing is an optimization technique designed specifically for solving QUBO and Ising Hamiltonian problems.
+
+Instead of exhaustively searching every possible RNA folding configuration, the optimization algorithm searches the energy landscape defined by the Hamiltonian.
+
+Advantages include:
+
+- Native support for binary optimization problems.
+- Natural mapping from Hamiltonians to hardware.
+- Scalability to increasingly complex optimization formulations.
+- Compatibility with D-Wave quantum annealers.
+
+Although this project currently employs D-Wave Ocean's **Simulated Annealing Sampler**, the software architecture has been intentionally designed such that the optimization backend may be replaced with an actual quantum annealer with minimal modifications.
+
+---
+
+# 📚 Research Foundation
+
+The mathematical formulation implemented throughout this repository is based primarily upon two research publications.
+
+### Paper I
+
+> **A QUBO Model of the RNA Folding Problem Optimized by Variational Hybrid Quantum Annealing**
+
+This publication introduces three successive QUBO formulations for RNA folding.
+
+The present implementation adopts **Model 3**, which incorporates
+
+- nearest-neighbour stacking energies,
+- hairpin loop penalties,
+- overlap constraints,
+- trainable Hamiltonian coefficients,
+- and pseudoknot penalties.
+
+---
+
+### Paper II
+
+> **Accurate SHAPE-directed RNA Secondary Structure Modeling, Including Pseudoknots**
+
+The original QUBO formulation employs heuristic pseudoknot penalties.
+
+To provide a more physically meaningful representation, this implementation instead adopts the polymer entropy model proposed by Hajdin et al.
+
+The pseudoknot penalty therefore depends upon
+
+- helix lengths,
+- connecting loop lengths,
+- polymer entropy,
+- and empirically derived λ lookup tables,
+
+rather than a constant heuristic penalty.
+
+---
+
+# 🧠 Design Philosophy
+
+During development, a major design objective was strict separation between
+
+1. Thermodynamic calculations
+2. Candidate generation
+3. Mathematical formulation
+4. Optimization
+5. Decoding
+6. Evaluation
+
+Consequently,
+
+- **ViennaRNA** is responsible solely for thermodynamic calculations.
+- **StemGenerator** performs only geometric candidate generation.
+- **QUBOBuilder** constructs the Hamiltonian.
+- **QuantumSolver** performs optimization.
+- **Decoder** converts binary variables into RNA structures.
+- **Metrics** evaluates prediction quality.
+
+This separation significantly improves maintainability, unit testing and future extensibility.
+
+---
+
+> [!TIP]
+> The implementation intentionally avoids using ViennaRNA to predict the final RNA structure. ViennaRNA is employed exclusively for thermodynamic parameter extraction and benchmarking. The final predicted secondary structure is obtained solely by minimizing the constructed QUBO Hamiltonian using a quantum-inspired optimization backend.
