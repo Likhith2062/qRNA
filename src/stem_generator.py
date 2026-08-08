@@ -67,6 +67,8 @@ class StemGenerator:
 
         self.next_id = 0
 
+        self._seen = set()
+
     # -----------------------------------------------------
 
     def generate(self):
@@ -78,6 +80,8 @@ class StemGenerator:
         self.stems.clear()
 
         self.next_id = 0
+
+        self._seen.clear()
 
         for i in range(self.n):
 
@@ -169,16 +173,25 @@ class StemGenerator:
 
                 last = sub[-1]
 
+                key = (
+                    first[0],      # start5
+                    last[0],       # end5
+                    last[1],       # start3
+                    first[1],      # end3
+                    length,
+                )
+
+                if key in self._seen:
+                    continue
+
+                self._seen.add(key)
+
                 stem = Stem(
-
                     id=self.next_id,
-
                     start5=first[0],
                     end5=last[0],
-
                     start3=last[1],
                     end3=first[1],
-
                     length=length,
                 )
 
