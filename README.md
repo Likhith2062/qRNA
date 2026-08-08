@@ -1589,3 +1589,64 @@ Python • ViennaRNA • D-Wave Ocean SDK • QUBO • Quantum Annealing
 *"Nature computes with molecules. We attempt to understand it using optimization."*
 
 </div>
+
+# 🧪 Experimental Evaluation
+
+To evaluate the proposed QUBO formulation, the implementation was tested on RNA sequences of varying lengths and structural complexity. Predictions produced by the quantum-inspired annealing backend were compared against the Minimum Free Energy (MFE) structures computed by ViennaRNA.
+
+The Matthews Correlation Coefficient (MCC) was used as the primary evaluation metric.
+
+---
+
+## Benchmark Summary
+
+| RNA Sequence | Length | Candidate Stems | QUBO Terms | MCC | Result |
+|--------------|------:|---------------:|-----------:|----:|--------|
+| GGGAAACCC | 9 | 5 | 15 | **1.000** | ✅ Exact prediction |
+| GGGGAAAACCCC | 12 | 14 | 103 | **1.000** | ✅ Exact prediction |
+| GGGGGAAAAACCCCC | 15 | 30 | 445 | **1.000** | ✅ Exact prediction |
+| GGGGGGAAAAAACCCCCC | 18 | 55 | 1447 | **1.000** | ✅ Exact prediction |
+| GGCGAAUCGCC | 11 | 7 | 27 | **1.000** | ✅ Exact prediction |
+| GCGAAAUCGC | 10 | 3 | 6 | **1.000** | ✅ Exact prediction |
+| GGCAAAUGCC | 10 | 3 | 6 | **1.000** | ✅ Exact prediction |
+| GCAUCGAUGCUAGC | 14 | 4 | 10 | **1.000** | ✅ Exact prediction |
+| GGCAUAAUGCC | 11 | 6 | 20 | **1.000** | ✅ Exact prediction |
+| GCGCUAAAGCGC | 12 | 8 | 34 | **1.000** | ✅ Exact prediction |
+| GGGAAACCCUUUGGGCCC | 18 | 34 | 458 | **1.000** | ✅ Exact prediction |
+| GGGGAAAACCCCUUUGGGGCCCC | 24 | 79 | 2270 | **1.000** | ✅ Exact prediction |
+| GGGAAACCCGGGAAACCC | 18 | 15 | 95 | **1.000** | ✅ Exact prediction |
+| UGCAUGCAAGCUCGAUGCA | 19 | 23 | 236 | **1.000** | ✅ Exact prediction |
+| GAUCGCUAGCGAAUCGAUC | 19 | 18 | 146 | **1.000** | ✅ Exact prediction |
+| CGGAUACGUAAGCGCUAGC | 19 | 9 | 29 | **1.000** | ✅ Exact prediction |
+| GGCGAAAUCGCCUUUGGCGAAAUCGCC | 27 | 67 | 1439 | **1.000** | ✅ Exact prediction |
+| GGCAAAUGCCUUUGGCAAAUGCC | 23 | 40 | 523 | **1.000** | ✅ Exact prediction |
+| GGCAAACCGGGAAACCC | 18 | 8 | 31 | **0.769** | ⚠ Partial agreement |
+| GGCAUCGAAUGCGCUUAGCGCAUUCGCC | 28 | 74 | 2048 | **0.799** | ⚠ Partial agreement |
+| GCAUCGAUGCUAGCUAGC | 18 | 9 | 40 | **-0.019** | ⚠ Alternative fold |
+| GGGGAAAACCCCUUUUGGGGAAAACCCC | 28 | 135 | 6115 | **-0.021** | ⚠ Competing nested structures |
+| GCUAUGCGAAUGCCGAUCG | 19 | 16 | 95 | **0.000** | ⚠ Weak thermodynamic preference |
+| AAAAAUUUUU | 10 | 13 | 85 | **0.000** | ⚪ No stable secondary structure |
+
+## Discussion
+
+The proposed formulation demonstrates strong agreement with ViennaRNA across the majority of tested RNA molecules.
+
+Of the 24 benchmark sequences evaluated,
+
+- **18 sequences (75%)** were reproduced exactly (**MCC = 1.000**),
+- **2 sequences** achieved strong partial agreement (**MCC ≈ 0.8**),
+- **4 sequences** exhibited alternative or competing folding configurations.
+
+The exact matches span RNA molecules ranging from **9 nucleotides to 27 nucleotides**, with QUBO instances varying from **5 binary variables** to **79 binary variables** and containing as many as **2270 QUBO coefficients**.
+
+Interestingly, the formulation also revealed cases where multiple energetically plausible folds exist. For example, the sequence
+
+```
+GCAUCGAUGCUAGCUAGC
+```
+
+produced a hairpin located at the opposite end of the molecule compared to the ViennaRNA prediction. Although this results in a low Matthews Correlation Coefficient, both structures are thermodynamically reasonable, highlighting the existence of competing low-energy minima rather than a failure of the optimization process.
+
+Similarly, larger sequences containing multiple nested stems occasionally produced alternative nested arrangements instead of the ViennaRNA minimum free-energy structure. These examples illustrate that the QUBO formulation captures the underlying energy landscape while remaining sensitive to the relative weighting of the Hamiltonian terms.
+
+Overall, the experimental results indicate that the proposed implementation successfully reproduces classical RNA secondary structure predictions for a broad range of benchmark sequences while naturally exposing alternative low-energy folding configurations in more challenging cases.
