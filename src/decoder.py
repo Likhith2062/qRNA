@@ -153,3 +153,51 @@ class Decoder:
             matrix,
             dtype=np.int8,
         )
+
+    @staticmethod
+    def dot_bracket_to_matrix(
+        dot_bracket: str,
+    ):
+        """
+        Convert a dot-bracket structure into a
+        symmetric adjacency matrix.
+
+        Currently supports () only.
+        """
+
+        import numpy as np
+
+        n = len(dot_bracket)
+
+        matrix = np.zeros(
+            (n, n),
+            dtype=np.int8,
+        )
+
+        stack = []
+
+        for i, c in enumerate(dot_bracket):
+
+            if c == "(":
+
+                stack.append(i)
+
+            elif c == ")":
+
+                if not stack:
+                    raise ValueError(
+                        "Unbalanced dot-bracket."
+                    )
+
+                j = stack.pop()
+
+                matrix[j, i] = 1
+                matrix[i, j] = 1
+
+        if stack:
+
+            raise ValueError(
+                "Unbalanced dot-bracket."
+            )
+
+        return matrix

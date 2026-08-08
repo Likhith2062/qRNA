@@ -109,6 +109,20 @@ class Vienna:
 
         return float(self.fc.eval_structure(dot_bracket))
 
+    def mfe(self) -> tuple[str, float]:
+        """
+        Compute the minimum free-energy (MFE) secondary structure.
+
+        Returns
+        -------
+        tuple[str, float]
+            (dot_bracket, energy)
+        """
+
+        structure, energy = self.fc.mfe()
+
+        return structure, float(energy)
+
     # ---------------------------------------------------------
     # Local motif energies
     # ---------------------------------------------------------
