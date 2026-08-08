@@ -1574,22 +1574,6 @@ Unlike traditional dynamic programming approaches, the RNA folding problem is re
 
 The implementation emphasizes modularity, reproducibility and extensibility, enabling future execution on quantum annealing hardware and facilitating further research into quantum optimization methods for computational biology.
 
----
-
-<div align="center">
-
-## 🧬 RNA Folding × Quantum Computing
-
-**Built with ❤️ using**
-
-Python • ViennaRNA • D-Wave Ocean SDK • QUBO • Quantum Annealing
-
----
-
-*"Nature computes with molecules. We attempt to understand it using optimization."*
-
-</div>
-
 # 🧪 Experimental Evaluation
 
 To evaluate the proposed QUBO formulation, the implementation was tested on RNA sequences of varying lengths and structural complexity. Predictions produced by the quantum-inspired annealing backend were compared against the Minimum Free Energy (MFE) structures computed by ViennaRNA.
@@ -1650,3 +1634,19 @@ produced a hairpin located at the opposite end of the molecule compared to the V
 Similarly, larger sequences containing multiple nested stems occasionally produced alternative nested arrangements instead of the ViennaRNA minimum free-energy structure. These examples illustrate that the QUBO formulation captures the underlying energy landscape while remaining sensitive to the relative weighting of the Hamiltonian terms.
 
 Overall, the experimental results indicate that the proposed implementation successfully reproduces classical RNA secondary structure predictions for a broad range of benchmark sequences while naturally exposing alternative low-energy folding configurations in more challenging cases.
+
+---
+
+<div align="center">
+
+## 🧬 RNA Folding × Quantum Computing
+
+**Built using**
+
+Python • ViennaRNA • D-Wave Ocean SDK • QUBO • Quantum Annealing
+
+---
+
+*"Nature computes with molecules. We attempt to understand it using optimization."*
+
+</div>
