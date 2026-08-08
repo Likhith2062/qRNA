@@ -17,3 +17,35 @@ def calculate_mcc(true_matrix: np.ndarray, pred_matrix: np.ndarray) -> float:
         return 0.0
 
     return numerator / denominator
+
+def evaluate(
+    true_matrix: np.ndarray,
+    pred_matrix: np.ndarray,
+) -> dict:
+    """
+    Evaluate a predicted RNA secondary structure.
+    """
+
+    TP = np.sum((true_matrix == 1) & (pred_matrix == 1))
+    TN = np.sum((true_matrix == 0) & (pred_matrix == 0))
+    FP = np.sum((true_matrix == 0) & (pred_matrix == 1))
+    FN = np.sum((true_matrix == 1) & (pred_matrix == 0))
+
+    mcc = calculate_mcc(
+        true_matrix,
+        pred_matrix,
+    )
+
+    return {
+
+        "TP": int(TP),
+
+        "TN": int(TN),
+
+        "FP": int(FP),
+
+        "FN": int(FN),
+
+        "MCC": float(mcc),
+
+    }
