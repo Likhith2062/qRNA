@@ -188,7 +188,7 @@ class QUBOBuilder:
 
         return max(
 
-            data.stacking_energy
+            -data.stacking_energy
 
             for data in self.data.values()
 
@@ -204,7 +204,21 @@ class QUBOBuilder:
         """
         data = self.data[stem.id]
 
-        k = data.stacking_energy
+        # Convert thermodynamic free energy (negative)
+        # into stabilizing energy magnitude (positive),
+        # as assumed by the Model 3 Hamiltonian.
+
+        # ViennaRNA reports stabilizing stem free energies
+        # as negative ΔG values.
+        #
+        # Model 3 uses stem energy as a positive stabilizing
+        # quantity. Therefore convert
+        #
+        #     k = -ΔG
+        #
+        # before evaluating the Hamiltonian.
+
+        k = -data.stacking_energy
 
         l = data.hairpin_penalty
 
