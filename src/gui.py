@@ -218,6 +218,8 @@ class MainWindow(QMainWindow):
         root.addWidget(subtitle)
 
         box = QGroupBox("RNA Sequence")
+        box.setFixedHeight(200)
+
         layout = QVBoxLayout(box)
 
         self.sequence = QTextEdit()
