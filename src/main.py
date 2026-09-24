@@ -121,5 +121,4 @@ def launch_gui():
 
 
 if __name__ == "__main__":
-    # Change this to launch_gui() when you want the graphical interface.
     main()
