@@ -12,7 +12,8 @@ from PySide6.QtWidgets import (
     QApplication, QFileDialog, QFrame, QGridLayout, QGroupBox,
     QHBoxLayout, QLabel, QMainWindow, QMessageBox, QProgressBar,
     QPushButton, QScrollArea, QTableWidget, QTableWidgetItem,
-    QTabWidget, QTextEdit, QVBoxLayout, QWidget, QComboBox
+    QTabWidget, QTextEdit, QVBoxLayout, QWidget, QComboBox,
+    QHeaderView
 )
 
 
@@ -339,8 +340,16 @@ class MainWindow(QMainWindow):
                 len(result.stems)
             ),
             (
+                "QUBO Variables",
+                result.qubo_variables
+            ),
+            (
                 "QUBO Coefficients",
                 len(result.qubo)
+            ),
+            (
+                "Runtime",
+                f"{result.runtime:.4f} s"
             ),
             (
                 "ViennaRNA MFE",
@@ -523,23 +532,44 @@ class MainWindow(QMainWindow):
 
         self.table = QTableWidget()
 
-        self.table.setColumnCount(13)
+        self.table.setColumnCount(15)
 
         self.table.setHorizontalHeaderLabels([
             "ID",
             "Sequence",
             "Stems",
+            "QUBO Variables",
             "QUBO Coefficients",
             "QUBO Structure",
             "QUBO Structure Energy",
             "ViennaRNA",
             "ViennaRNA MFE",
+            "Runtime",
             "TP",
             "TN",
             "FP",
             "FN",
             "MCC"
         ])
+
+        # Let compact columns size to their contents while the long
+        # sequence/structure columns use the remaining window width.
+        header = self.table.horizontalHeader()
+
+        for column in range(self.table.columnCount()):
+            header.setSectionResizeMode(
+                column,
+                QHeaderView.ResizeToContents
+            )
+
+        for column in (1, 5, 7):
+            header.setSectionResizeMode(
+                column,
+                QHeaderView.Stretch
+            )
+
+        header.setMinimumSectionSize(55)
+        header.setStretchLastSection(False)
 
         self.table.setAlternatingRowColors(
             True
@@ -775,11 +805,13 @@ class MainWindow(QMainWindow):
 
         values = [
             len(result.stems),
+            result.qubo_variables,
             len(result.qubo),
             result.prediction,
             f"{result.prediction_energy:.2f} kcal/mol",
             result.reference,
             f"{result.mfe:.2f} kcal/mol",
+            f"{result.runtime:.4f} s",
             result.metrics["TP"],
             result.metrics["TN"],
             result.metrics["FP"],
@@ -880,12 +912,15 @@ class MainWindow(QMainWindow):
 
             writer.writerow([
                 "Sequence",
+                "Sequence Length",
                 "Candidate Stems",
+                "QUBO Variables",
                 "QUBO Coefficients",
                 "QUBO Structure",
+                "QUBO Structure Energy",
                 "ViennaRNA Structure",
                 "ViennaRNA MFE",
-                "QUBO Structure Energy",
+                "Runtime (s)",
                 "TP",
                 "TN",
                 "FP",
@@ -897,12 +932,15 @@ class MainWindow(QMainWindow):
 
                 writer.writerow([
                     result.sequence,
+                    len(result.sequence),
                     len(result.stems),
+                    result.qubo_variables,
                     len(result.qubo),
                     result.prediction,
+                    result.prediction_energy,
                     result.reference,
                     result.mfe,
-                    result.prediction_energy,
+                    result.runtime,
                     result.metrics["TP"],
                     result.metrics["TN"],
                     result.metrics["FP"],

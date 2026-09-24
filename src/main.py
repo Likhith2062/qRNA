@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import time
 
 from vienna import Vienna
 from stem_generator import StemGenerator
@@ -22,10 +23,13 @@ class PredictionResult:
     metrics: dict
     prediction_matrix: object
     reference_matrix: object
+    qubo_variables: int
+    runtime: float
 
 
 def predict(sequence: str) -> PredictionResult:
     """Run the complete RNA prediction pipeline."""
+    start_time = time.perf_counter()
     sequence = sequence.strip().upper()
 
     if not sequence:
@@ -53,9 +57,9 @@ def predict(sequence: str) -> PredictionResult:
 
     reference, mfe = vienna.mfe()
     reference_matrix = Decoder.dot_bracket_to_matrix(reference)
-    reference_matrix = Decoder.dot_bracket_to_matrix(reference)
 
     results = evaluate(reference_matrix, prediction_matrix)
+    runtime = time.perf_counter() - start_time
 
     return PredictionResult(
         sequence=sequence,
@@ -68,6 +72,8 @@ def predict(sequence: str) -> PredictionResult:
         metrics=results,
         prediction_matrix=prediction_matrix,
         reference_matrix=reference_matrix,
+        qubo_variables=len(stems),
+        runtime=runtime,
     )
 
 
@@ -81,27 +87,26 @@ def main():
         print(f"Error: {exc}")
         return
 
-    print(f"\nGenerated {len(result.stems)} candidate stems.")
-    print(f"QUBO contains {len(result.qubo)} coefficients.")
+    print()
+    print("Benchmark")
+    print("---------")
+    print(f"Sequence Length   : {len(result.sequence)}")
+    print(f"Candidate Stems   : {len(result.stems)}")
+    print(f"QUBO Variables    : {result.qubo_variables}")
+    print(f"QUBO Coefficients : {len(result.qubo)}")
+    print(f"Runtime           : {result.runtime:.4f} s")
 
     print()
     print("QUBO Predicted Structure")
     print("------------------------")
     print(result.prediction)
+    print(f"Energy : {result.prediction_energy:.2f} kcal/mol")
 
     print()
     print("ViennaRNA MFE")
     print("-------------")
     print(result.reference)
     print(f"Energy : {result.mfe:.2f} kcal/mol")
-
-    print()
-    print("QUBO Predicted Structure")
-    print("------------------------")
-    print(result.prediction)
-    print(
-        f"Energy : {result.prediction_energy:.2f} kcal/mol"
-    )
 
     print()
     print("Evaluation")
@@ -123,7 +128,7 @@ def launch_gui():
         print(f"Details: {exc}")
         return
 
-    run_gui(predict)
+    run_gui()
 
 
 if __name__ == "__main__":
