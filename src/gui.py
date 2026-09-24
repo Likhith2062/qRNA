@@ -347,8 +347,8 @@ class MainWindow(QMainWindow):
                 f"{result.mfe:.2f} kcal/mol"
             ),
             (
-                "QUBO Energy",
-                f"{result.solver_energy:.4f}"
+                "QUBO Structure Energy",
+                f"{result.prediction_energy:.4f} kcal/mol"
             ),
             (
                 "TP",
@@ -523,7 +523,7 @@ class MainWindow(QMainWindow):
 
         self.table = QTableWidget()
 
-        self.table.setColumnCount(11)
+        self.table.setColumnCount(13)
 
         self.table.setHorizontalHeaderLabels([
             "ID",
@@ -531,7 +531,9 @@ class MainWindow(QMainWindow):
             "Stems",
             "QUBO Coefficients",
             "QUBO Structure",
+            "QUBO Structure Energy",
             "ViennaRNA",
+            "ViennaRNA MFE",
             "TP",
             "TN",
             "FP",
@@ -775,7 +777,9 @@ class MainWindow(QMainWindow):
             len(result.stems),
             len(result.qubo),
             result.prediction,
+            f"{result.prediction_energy:.2f} kcal/mol",
             result.reference,
+            f"{result.mfe:.2f} kcal/mol",
             result.metrics["TP"],
             result.metrics["TN"],
             result.metrics["FP"],
@@ -881,7 +885,7 @@ class MainWindow(QMainWindow):
                 "QUBO Structure",
                 "ViennaRNA Structure",
                 "ViennaRNA MFE",
-                "QUBO Energy",
+                "QUBO Structure Energy",
                 "TP",
                 "TN",
                 "FP",
@@ -898,7 +902,7 @@ class MainWindow(QMainWindow):
                     result.prediction,
                     result.reference,
                     result.mfe,
-                    result.solver_energy,
+                    result.prediction_energy,
                     result.metrics["TP"],
                     result.metrics["TN"],
                     result.metrics["FP"],

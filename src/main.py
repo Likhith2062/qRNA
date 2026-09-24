@@ -18,7 +18,7 @@ class PredictionResult:
     prediction: str
     reference: str
     mfe: float
-    solver_energy: float
+    prediction_energy: float
     metrics: dict
     prediction_matrix: object
     reference_matrix: object
@@ -49,7 +49,10 @@ def predict(sequence: str) -> PredictionResult:
     prediction = decoder.dot_bracket(result.solution)
     prediction_matrix = decoder.adjacency_matrix(result.solution)
 
+    prediction_energy = vienna.evaluate(prediction)
+
     reference, mfe = vienna.mfe()
+    reference_matrix = Decoder.dot_bracket_to_matrix(reference)
     reference_matrix = Decoder.dot_bracket_to_matrix(reference)
 
     results = evaluate(reference_matrix, prediction_matrix)
@@ -61,7 +64,7 @@ def predict(sequence: str) -> PredictionResult:
         prediction=prediction,
         reference=reference,
         mfe=mfe,
-        solver_energy=result.energy,
+        prediction_energy=prediction_energy,
         metrics=results,
         prediction_matrix=prediction_matrix,
         reference_matrix=reference_matrix,
@@ -93,9 +96,12 @@ def main():
     print(f"Energy : {result.mfe:.2f} kcal/mol")
 
     print()
-    print("Solver")
-    print("------")
-    print(f"QUBO Energy : {result.solver_energy:.4f}")
+    print("QUBO Predicted Structure")
+    print("------------------------")
+    print(result.prediction)
+    print(
+        f"Energy : {result.prediction_energy:.2f} kcal/mol"
+    )
 
     print()
     print("Evaluation")
